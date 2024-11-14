@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Calcul du Patrimoine Restant en fonction de la durée de vie</title>
+    <!-- Intégration de Chart.js via CDN avec une version spécifique -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Intégration de jQuery via CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Styles généraux */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        /* Conteneur principal en flexbox */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        /* Section des champs de saisie */
+        .input-section {
+            flex: 1 1 45%;
+            max-width: 45%;
+        }
+        /* Section du graphique */
+        .chart-section {
+            flex: 1 1 50%;
+            max-width: 50%;
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input[type="radio"] {
+            margin-left: 10px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #2980b9;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        .result {
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        hr {
+            margin-top: 30px;
+            border: none;
+            border-top: 1px solid #ecf0f1;
+        }
+        /* Styles du tableau */
+        #tableau {
+            margin-top: 20px;
+            display: none; /* Le tableau est caché par défaut */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ecf0f1;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #2980b9;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* Style du lien pour afficher le tableau */
+        #afficherTableau {
+            margin-top: 20px;
+            display: inline-block;
+            color: #2980b9;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: underline;
+        }
+        /* Styles du graphique */
+        canvas {
+            margin-top: 20px;
+            background-color: #fff;
+            border: 1px solid #ecf0f1;
+            border-radius: 4px;
+            padding: 20px;
+            max-width: 100%;
+        }
+        /* Ajustements pour les petits écrans */
+        @media (max-width: 800px) {
+            .input-section, .chart-section {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+            .chart-section {
+                margin-top: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Calcul du Patrimoine Restant en fonction de la durée de vie résiduelle</h1>
+    <h2>Données INSEE 2020</h2>
+    <h3>Formule et programme chatGPTo1preview</h3>
+
+    <div class="container">
+        <!-- Section des champs de saisie -->
+        <div class="input-section">
+            <label>
+                Sexe biologique :
+                <input type="radio" name="genre" value="homme" checked> Homme
+                <input type="radio" name="genre" value="femme"> Femme
+            </label>
+            <label>
+                Âge actuel (A) :
+                <input type="number" id="A" value="60" step="any">
+            </label>
+            <label>
+                Patrimoine initial (P) en euros :
+                <input type="number" id="P" value="100000" step="any">
+            </label>
+            <label>
+                Taux d'inflation annuel (i) en % :
+                <input type="number" id="i" value="2" step="any">
+            </label>
+            <label>
+                Taux de rémunération annuel du capital (r) en % :
+                <input type="number" id="r" value="1" step="any">
+            </label>
+            <label>
+                Prélèvement mensuel sur le capital initial (S) en euros :
+                <input type="number" id="S" value="2000" step="any">
+            </label>
+            <hr>
+            <label>
+                Âge de départ à la retraite :
+                <input type="number" id="ageRetraite" value="64" step="any">
+            </label>
+            <label>
+                Montant initial de la retraite mensuelle en euros :
+                <input type="number" id="pensionMensuelleInitiale" value="2000" step="any">
+            </label>
+            <label>
+                Taux de revalorisation de la retraite annuel en % :
+                <input type="number" id="tauxRevalorisationRetraite" value="1" step="any">
+            </label>
+
+            <button onclick="calculer()">Calculer NR et C</button>
+
+            <div class="result" id="result"></div>
+
+            <!-- Lien pour afficher le tableau -->
+            <div id="afficherTableau">Afficher le tableau</div>
+            <!-- Zone pour le tableau (cachée par défaut) -->
+            <div id="tableau"></div>
+        </div>
+
+        <!-- Section du graphique -->
+        <div class="chart-section">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function calculer() {
+            // Récupération des valeurs entrées par l'utilisateur
+            var genre = document.querySelector('input[name="genre"]:checked').value;
+            var a, b;
+
+            // Définition des coefficients a et b en fonction du genre
+            if (genre === 'homme') {
+                a = -0.9279;
+                b = 78.492;
+            } else {
+                a = -0.9582;
+                b = 84.793;
+            }
+
+            var A = parseFloat(document.getElementById('A').value);
+            var P = parseFloat(document.getElementById('P').value);
+            var i_annuel = parseFloat(document.getElementById('i').value) / 100;
+            var r_annuel = parseFloat(document.getElementById('r').value) / 100;
+            var S_initial = parseFloat(document.getElementById('S').value);
+            var ageRetraite = parseFloat(document.getElementById('ageRetraite').value);
+            var pensionMensuelleInitiale = parseFloat(document.getElementById('pensionMensuelleInitiale').value);
+            var tauxRevalorisationRetraite_annuel = parseFloat(document.getElementById('tauxRevalorisationRetraite').value) / 100;
+
+            // Calcul de NR
+            var NR = a * A + b;
+
+            // Vérification si NR est positif
+            if (NR <= 0) {
+                document.getElementById('result').innerHTML = "Le nombre d'années restantes (NR) est négatif ou nul. Veuillez vérifier les valeurs saisies.";
+                document.getElementById('tableau').innerHTML = "";
+                return;
+            }
+
+            // Calcul du nombre total de mois
+            var n = Math.round(NR * 12);
+
+            // Conversion des taux annuels en taux mensuels effectifs
+            var r_mensuel = r_annuel === 0 ? 0 : Math.pow(1 + r_annuel, 1/12) - 1;
+            var i_mensuel = i_annuel === 0 ? 0 : Math.pow(1 + i_annuel, 1/12) - 1;
+            var tauxRevalorisationRetraite_mensuel = tauxRevalorisationRetraite_annuel === 0 ? 0 : Math.pow(1 + tauxRevalorisationRetraite_annuel, 1/12) - 1;
+
+            // Initialisation des variables
+            var P_actuel = P;
+            var S = S_initial;
+            var pensionMensuelle = pensionMensuelleInitiale;
+            var total_prelevements = 0;
+            var capitalParAn = []; // Tableau pour stocker le capital à chaque année
+            var ageActuel = A;
+            var moisAnnee = 0; // Compteur pour suivre les mois dans l'année
+            var capitalEpuisé = false;
+            var anneeEpuisement = 0;
+
+            // Simulation mois par mois
+            for (var mois = 1; mois <= n; mois++) {
+                // Le capital gagne des intérêts mensuels
+                P_actuel *= (1 + r_mensuel);
+
+                // Prélèvement du montant S
+                P_actuel -= S;
+
+                // À partir de l'âge de départ à la retraite, ajouter la pension au capital
+                if (ageActuel + (moisAnnee / 12) >= ageRetraite) {
+                    P_actuel += pensionMensuelle;
+                }
+
+                // Accumulation des prélèvements
+                total_prelevements += S;
+
+                // Ajustement du prélèvement pour le mois suivant si l'inflation est non nulle
+                if (i_mensuel !== 0) {
+                    S *= (1 + i_mensuel);
+                }
+
+                // Incrémentation du compteur de mois dans l'année
+                moisAnnee++;
+
+                // Ajustement du montant de la pension annuelle à la fin de chaque année après la retraite
+                if (moisAnnee === 12) {
+                    if (ageActuel >= ageRetraite - 1) {
+                        pensionMensuelle *= (1 + tauxRevalorisationRetraite_annuel);
+                    }
+                    ageActuel++;
+                    moisAnnee = 0;
+
+                    // Stockage du capital à chaque fin d'année
+                    capitalParAn.push({
+                        age: ageActuel.toFixed(2),
+                        capital: P_actuel > 0 ? P_actuel.toFixed(2) : "0.00"
+                    });
+                }
+
+                // Vérification si le capital devient négatif
+                if (P_actuel < 0 && !capitalEpuisé) {
+                    capitalEpuisé = true;
+                    anneeEpuisement = ageActuel + (moisAnnee / 12);
+                }
+
+                // Si le capital est épuisé, on arrête la simulation
+                if (P_actuel <= 0) {
+                    P_actuel = 0;
+                    break;
+                }
+            }
+
+            // Arrondir NR à deux décimales
+            NR = (n / 12).toFixed(2);
+
+            // Affichage des résultats
+            var resultText = "Nombre d'années restantes (NR) : <strong>" + NR + " ans</strong><br>";
+
+            if (capitalEpuisé) {
+                var anneesEcoulees = (anneeEpuisement - A).toFixed(2);
+                resultText += "Le capital est épuisé après <strong>" + anneesEcoulees + " ans</strong> (à l'âge de <strong>" + anneeEpuisement.toFixed(2) + " ans</strong>).";
+            } else {
+                resultText += "Patrimoine restant (C) : <strong>" + P_actuel.toFixed(2) + " euros</strong>";
+            }
+
+            document.getElementById('result').innerHTML = resultText;
+
+            // Génération du tableau du capital restant en fonction de l'âge
+            var tableHTML = "<table><tr><th>Âge</th><th>Capital restant (€)</th></tr>";
+
+            var ages = [];
+            var capitaux = [];
+
+            for (var i = 0; i < capitalParAn.length; i++) {
+                tableHTML += "<tr><td>" + capitalParAn[i].age + "</td><td>" + capitalParAn[i].capital + "</td></tr>";
+                ages.push(capitalParAn[i].age);
+                capitaux.push(parseFloat(capitalParAn[i].capital));
+            }
+
+            tableHTML += "</table>";
+
+            // Utilisation de innerHTML pour insérer le tableau
+            document.getElementById('tableau').innerHTML = tableHTML;
+
+            // Création du graphique avec Chart.js
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            // Destruction préalable du graphique s'il existe déjà
+            if (window.myChart && typeof window.myChart.destroy === 'function') {
+                window.myChart.destroy();
+            }
+
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ages,
+                    datasets: [{
+                        label: 'Capital restant (€)',
+                        data: capitaux,
+                        backgroundColor: 'rgba(41, 128, 185, 0.2)',
+                        borderColor: 'rgba(41, 128, 185, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 4,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Âge',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Capital restant (€)',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Capital restant : ' + context.parsed.y.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gestion du clic sur le lien pour afficher le tableau
+        $(document).ready(function() {
+            $('#afficherTableau').click(function() {
+                $('#tableau').fadeToggle();
+            });
+        });
+    </script>
+
+<small> https://www.insee.fr/fr/statistiques/2416631#tableau-figure1</small>
+</body>
+</html>
