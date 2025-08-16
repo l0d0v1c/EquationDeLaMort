@@ -2,130 +2,543 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Calcul du Patrimoine Restant en fonction de la durée de vie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Calcul du Patrimoine Restant</title>
     <!-- Intégration de Chart.js via CDN avec une version spécifique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <!-- Intégration de jQuery via CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Police Lexend Deca -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Styles généraux */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
+            font-family: 'Lexend Deca', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background: #085a92;
+            min-height: 100vh;
         }
+        
         h1 {
-            color: #2c3e50;
+            color: #fff;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease;
+            margin: 0 0 8px 0;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        h2, h3 {
+            color: #fff;
+            text-align: center;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s both;
+            margin: 5px 0;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+        
+        h3 a {
+            color: #ffeb3b;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        h3 a:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,235,59,0.8);
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         /* Conteneur principal en flexbox */
         .container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            animation: slideInUp 1s ease 0.5s both;
+            max-width: 600px;
+            margin: 0 auto;
         }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         /* Section des champs de saisie */
         .input-section {
-            flex: 1 1 45%;
-            max-width: 45%;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
+        .input-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+        
         /* Section du graphique */
         .chart-section {
-            flex: 1 1 50%;
-            max-width: 50%;
-            margin-top: 20px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .chart-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
         }
         label {
             display: block;
-            margin-top: 15px;
-            font-weight: bold;
-            color: #34495e;
+            margin-top: 12px;
+            font-weight: 500;
+            color: #2c3e50;
+            transition: color 0.3s ease;
+            font-size: 13px;
+            line-height: 1.4;
         }
+        
+        label:hover {
+            color: #667eea;
+        }
+        
         input[type="number"], select {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 10px;
+            margin-top: 6px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Lexend Deca', sans-serif;
             box-sizing: border-box;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255,255,255,1);
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.3);
+        }
+        
+        input[type="number"]:disabled {
+            background: rgba(240,240,240,0.8);
+            color: #666;
+            cursor: not-allowed;
+        }
+        
         input[type="radio"] {
             margin-left: 10px;
+            transform: scale(1.2);
+            accent-color: #667eea;
         }
+        
         button {
             margin-top: 20px;
-            padding: 12px 25px;
-            background-color: #2980b9;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: #fff;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Lexend Deca', sans-serif;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
         }
+        
         button:hover {
-            background-color: #3498db;
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(102,126,234,0.6);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
         }
         .result {
-            margin-top: 30px;
-            font-weight: bold;
-            font-size: 18px;
+            margin-top: 20px;
+            font-weight: 500;
+            font-size: 15px;
             color: #2c3e50;
+            padding: 15px;
+            background: rgba(76,175,80,0.1);
+            border-radius: 8px;
+            border-left: 3px solid #4caf50;
+            animation: pulse 2s infinite;
+            line-height: 1.5;
         }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
         hr {
-            margin-top: 30px;
+            margin: 20px 0;
             border: none;
-            border-top: 1px solid #ecf0f1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #667eea, transparent);
         }
+        
         /* Styles du tableau */
         #tableau {
             margin-top: 20px;
-            display: none; /* Le tableau est caché par défaut */
+            display: none;
+            animation: fadeIn 0.5s ease;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         table {
             border-collapse: collapse;
             width: 100%;
             margin-top: 10px;
             background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        
         th, td {
-            border: 1px solid #ecf0f1;
-            padding: 12px;
+            border: none;
+            padding: 15px;
             text-align: center;
             font-size: 14px;
+            transition: background-color 0.3s ease;
         }
+        
         th {
-            background-color: #2980b9;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: rgba(102,126,234,0.05);
         }
+        
+        tr:hover {
+            background-color: rgba(102,126,234,0.1);
+            transform: scale(1.01);
+        }
+        
         /* Style du lien pour afficher le tableau */
         #afficherTableau {
-            margin-top: 20px;
+            margin-top: 15px;
             display: inline-block;
-            color: #2980b9;
+            color: #667eea;
             cursor: pointer;
-            font-size: 16px;
-            text-decoration: underline;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Lexend Deca', sans-serif;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            background: rgba(102,126,234,0.1);
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        #afficherTableau:hover {
+            background: #667eea;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
         }
         /* Styles du graphique */
         canvas {
-            margin-top: 20px;
+            margin-top: 15px;
             background-color: #fff;
-            border: 1px solid #ecf0f1;
-            border-radius: 4px;
-            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
             max-width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            height: 280px !important;
         }
-        /* Ajustements pour les petits écrans */
-        @media (max-width: 800px) {
-            .input-section, .chart-section {
-                flex: 1 1 100%;
-                max-width: 100%;
+        
+        canvas:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Indicateur de chargement */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Classes additionnelles pour jQuery */
+        .field-focused {
+            transform: scale(1.02);
+        }
+        
+        .field-error input {
+            border-color: #e74c3c !important;
+            background-color: rgba(231,76,60,0.1) !important;
+        }
+        
+        .radio-selected {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .btn-loading {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+        
+        .loading-btn {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Styles pour les notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .notification-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification-close:hover {
+            opacity: 1;
+        }
+        
+        /* Footer style */
+        small {
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            display: block;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        /* Optimisations pour smartphones */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
             }
-            .chart-section {
-                margin-top: 40px;
+            
+            .container {
+                max-width: 100%;
+                gap: 12px;
+            }
+            
+            h1 {
+                font-size: 18px;
+                margin-bottom: 6px;
+            }
+            
+            h2, h3 {
+                font-size: 13px;
+                margin: 3px 0;
+            }
+            
+            .input-section, .chart-section {
+                padding: 15px;
+                border-radius: 10px;
+            }
+            
+            label {
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            
+            input[type="number"], select {
+                padding: 8px;
+                font-size: 16px;
+                border-radius: 6px;
+            }
+            
+            button {
+                margin-top: 15px;
+                padding: 10px 20px;
+                font-size: 14px;
+                border-radius: 15px;
+            }
+            
+            .result {
+                margin-top: 15px;
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            hr {
+                margin: 15px 0;
+            }
+            
+            #afficherTableau {
+                margin-top: 12px;
+                padding: 6px 12px;
+                font-size: 13px;
+                border-radius: 15px;
+            }
+            
+            canvas {
+                height: 240px !important;
+                padding: 8px;
+                border-radius: 6px;
+            }
+            
+            table {
+                font-size: 11px;
+                border-radius: 6px;
+            }
+            
+            th, td {
+                padding: 6px;
+            }
+            
+            .notification {
+                right: 8px;
+                left: 8px;
+                max-width: none;
+                padding: 15px;
+                border-radius: 8px;
+            }
+            
+            .notification-title {
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+            
+            .notification-message {
+                font-size: 12px;
+            }
+            
+            small {
+                font-size: 11px;
+                margin-top: 30px;
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                gap: 10px;
+            }
+            
+            h1 {
+                font-size: 16px;
+            }
+            
+            h2, h3 {
+                font-size: 12px;
+            }
+            
+            .input-section, .chart-section {
+                padding: 12px;
+            }
+            
+            canvas {
+                height: 200px !important;
+                padding: 6px;
+            }
+            
+            .notification {
+                right: 5px;
+                left: 5px;
+                padding: 12px;
+            }
+        }
+        
+        /* Optimisation tactile */
+        @media (pointer: coarse) {
+            input[type="number"], select, button, #afficherTableau {
+                min-height: 44px;
             }
         }
     </style>
@@ -134,7 +547,8 @@
 
     <h1>Calcul du Patrimoine Restant en fonction de la durée de vie résiduelle</h1>
     <h2>Données INSEE 2020</h2>
-    <h3>Formule et programme chatGPTo1preview <a href="https://github.com/l0d0v1c/EquationDeLaMort">Explications de l'équation de la mort qui tue</a></h3>
+    <h3><a href="https://github.com/l0d0v1c/EquationDeLaMort">Explications de l'équation de la mort qui tue</a></h3>
+    
 
     <div class="container">
         <!-- Section des champs de saisie -->
@@ -157,12 +571,31 @@
                 <input type="number" id="i" value="2" step="any">
             </label>
             <label>
-                Taux de rémunération annuel du capital (r) en % :
-                <input type="number" id="r" value="1" step="any">
+                Modèle de rémunération du capital :
+                <select id="modeleTaux">
+                    <option value="manuel">Manuel</option>
+                    <option value="optimiste">Optimiste (β = +0.65)</option>
+                    <option value="median" selected>Médian (β = -0.15)</option>
+                    <option value="pessimiste">Pessimiste (β = -0.85)</option>
+                    <option value="probabiliste">Moyenne pondérée</option>
+                </select>
             </label>
             <label>
-                Prélèvement mensuel sur le capital initial (S) en euros :
-                <input type="number" id="S" value="2000" step="any">
+                Taux de rémunération annuel du capital (r) en % :
+                <input type="number" id="r" value="1" step="any">
+                <small id="tauxInfo" style="color: #667eea; font-size: 11px; margin-top: 4px; display: block;"></small>
+            </label>
+            <label>
+                Revenu mensuel avant la retraite en euros :
+                <input type="number" id="revenuAvantRetraite" value="3000" step="any">
+            </label>
+            <label>
+                Prélèvement mensuel sur le capital AVANT la retraite en euros :
+                <input type="number" id="prelevementAvant" value="1000" step="any">
+            </label>
+            <label>
+                Prélèvement mensuel sur le capital APRÈS la retraite en euros :
+                <input type="number" id="prelevementApres" value="2000" step="any">
             </label>
             <hr>
             <label>
@@ -181,6 +614,10 @@
             <button onclick="calculer()">Calculer NR et C</button>
 
             <div class="result" id="result"></div>
+            
+            <button id="genererRapport" onclick="genererRapport()" style="display:none; margin-top: 15px; background: linear-gradient(45deg, #27ae60, #2ecc71); font-size: 14px;">
+                📄 Générer le rapport HTML
+            </button>
 
             <!-- Lien pour afficher le tableau -->
             <div id="afficherTableau">Afficher le tableau</div>
@@ -190,11 +627,109 @@
 
         <!-- Section du graphique -->
         <div class="chart-section">
+            <div class="loading" id="loadingIndicator">Génération du graphique...</div>
             <canvas id="myChart"></canvas>
         </div>
     </div>
 
+    <!-- Disclaimer en bas de page -->
+    <div style="background: #fff; border: 2px solid #085a92; border-radius: 10px; padding: 20px; margin: 30px auto; max-width: 600px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div style="color: #085a92; font-weight: bold; font-size: 16px; margin-bottom: 10px;">⚠️ APPLICATION EXPÉRIMENTALE</div>
+        <div style="color: #333; font-size: 14px; line-height: 1.5;">
+            Cette application est un <strong>outil de simulation à des fins pédagogiques uniquement</strong>.<br>
+            Elle ne constitue <strong>en aucun cas un conseil financier personnalisé</strong>.<br>
+            <strong>Consultez un professionnel qualifié</strong> pour vos décisions d'investissement.
+        </div>
+    </div>
+
     <script>
+        // Fonction pour calculer le taux de rémunération selon le modèle choisi
+        function calculerTauxRemuneration(inflation, modele, volatilite = 0.5) {
+            const R_base = 3.5;
+            const gamma = -0.05;
+            const delta = -0.3;
+            const pi = inflation;
+            const pi_squared = pi * pi;
+            const volatilite_pi = volatilite;
+            
+            let beta, taux;
+            
+            switch(modele) {
+                case 'optimiste':
+                    beta = 0.65;
+                    taux = R_base + beta * pi + gamma * pi_squared + delta * volatilite_pi;
+                    break;
+                case 'median':
+                    beta = -0.15;
+                    taux = R_base + beta * pi + gamma * pi_squared + delta * volatilite_pi;
+                    break;
+                case 'pessimiste':
+                    beta = -0.85;
+                    taux = R_base + beta * pi + gamma * pi_squared + delta * volatilite_pi;
+                    break;
+                case 'probabiliste':
+                    // Calcul des trois scénarios
+                    const r_opt = R_base + 0.65 * pi + gamma * pi_squared + delta * volatilite_pi;
+                    const r_med = R_base + (-0.15) * pi + gamma * pi_squared + delta * volatilite_pi;
+                    const r_pess = R_base + (-0.85) * pi + gamma * pi_squared + delta * volatilite_pi;
+                    
+                    // Pondérations selon le niveau d'inflation
+                    let p_opt, p_med, p_pess;
+                    if (pi <= 2) {
+                        p_opt = 0.3; p_med = 0.6; p_pess = 0.1;
+                    } else if (pi <= 4) {
+                        p_opt = 0.4; p_med = 0.5; p_pess = 0.1;
+                    } else if (pi <= 6) {
+                        p_opt = 0.2; p_med = 0.5; p_pess = 0.3;
+                    } else if (pi <= 8) {
+                        p_opt = 0.1; p_med = 0.4; p_pess = 0.5;
+                    } else {
+                        p_opt = 0.05; p_med = 0.25; p_pess = 0.7;
+                    }
+                    
+                    taux = p_opt * r_opt + p_med * r_med + p_pess * r_pess;
+                    break;
+                default:
+                    return null; // Mode manuel
+            }
+            
+            return Math.max(taux, -10); // Limite inférieure pour éviter des taux aberrants
+        }
+        
+        // Fonction pour mettre à jour l'affichage du taux selon le modèle
+        function mettreAJourTaux() {
+            const modele = document.getElementById('modeleTaux').value;
+            const inflation = parseFloat(document.getElementById('i').value) || 2;
+            const champTaux = document.getElementById('r');
+            const infoTaux = document.getElementById('tauxInfo');
+            
+            if (modele === 'manuel') {
+                champTaux.disabled = false;
+                infoTaux.textContent = 'Taux saisi manuellement';
+            } else {
+                const tauxCalcule = calculerTauxRemuneration(inflation, modele);
+                champTaux.value = tauxCalcule.toFixed(2);
+                champTaux.disabled = true;
+                
+                let description = '';
+                switch(modele) {
+                    case 'optimiste':
+                        description = 'Scénario optimiste : Actifs réels, politique accommodante';
+                        break;
+                    case 'median':
+                        description = 'Scénario médian : Portefeuille diversifié, économie mixte';
+                        break;
+                    case 'pessimiste':
+                        description = 'Scénario pessimiste : Obligations dominantes, stagflation';
+                        break;
+                    case 'probabiliste':
+                        description = 'Moyenne pondérée selon le niveau d\'inflation';
+                        break;
+                }
+                infoTaux.textContent = `${description} (Calculé: ${tauxCalcule.toFixed(2)}%)`;
+            }
+        }
+
         function calculer() {
             // Récupération des valeurs entrées par l'utilisateur
             var genre = document.querySelector('input[name="genre"]:checked').value;
@@ -213,7 +748,9 @@
             var P = parseFloat(document.getElementById('P').value);
             var i_annuel = parseFloat(document.getElementById('i').value) / 100;
             var r_annuel = parseFloat(document.getElementById('r').value) / 100;
-            var S_initial = parseFloat(document.getElementById('S').value);
+            var revenuAvantRetraite = parseFloat(document.getElementById('revenuAvantRetraite').value);
+            var prelevementAvant = parseFloat(document.getElementById('prelevementAvant').value);
+            var prelevementApres = parseFloat(document.getElementById('prelevementApres').value);
             var ageRetraite = parseFloat(document.getElementById('ageRetraite').value);
             var pensionMensuelleInitiale = parseFloat(document.getElementById('pensionMensuelleInitiale').value);
             var tauxRevalorisationRetraite_annuel = parseFloat(document.getElementById('tauxRevalorisationRetraite').value) / 100;
@@ -238,7 +775,8 @@
 
             // Initialisation des variables
             var P_actuel = P;
-            var S = S_initial;
+            var revenuMensuel = revenuAvantRetraite;
+            var prelevementMensuel = prelevementAvant;
             var pensionMensuelle = pensionMensuelleInitiale;
             var total_prelevements = 0;
             var capitalParAn = []; // Tableau pour stocker le capital à chaque année
@@ -252,20 +790,33 @@
                 // Le capital gagne des intérêts mensuels
                 P_actuel *= (1 + r_mensuel);
 
-                // Prélèvement du montant S
-                P_actuel -= S;
-
-                // À partir de l'âge de départ à la retraite, ajouter la pension au capital
-                if (ageActuel + (moisAnnee / 12) >= ageRetraite) {
+                // Gestion des flux selon la période (avant/après retraite)
+                if (ageActuel + (moisAnnee / 12) < ageRetraite) {
+                    // AVANT LA RETRAITE
+                    // Ajouter le revenu mensuel au capital
+                    P_actuel += revenuMensuel;
+                    // Prélever selon le montant avant retraite
+                    P_actuel -= prelevementMensuel;
+                    // Accumulation des prélèvements
+                    total_prelevements += prelevementMensuel;
+                } else {
+                    // APRÈS LA RETRAITE
+                    // Ajouter la pension au capital
                     P_actuel += pensionMensuelle;
+                    // Prélever selon le montant après retraite
+                    P_actuel -= prelevementApres;
+                    // Accumulation des prélèvements
+                    total_prelevements += prelevementApres;
                 }
 
-                // Accumulation des prélèvements
-                total_prelevements += S;
-
-                // Ajustement du prélèvement pour le mois suivant si l'inflation est non nulle
+                // Ajustement des montants pour l'inflation
                 if (i_mensuel !== 0) {
-                    S *= (1 + i_mensuel);
+                    // Ajuster le revenu avant retraite
+                    revenuMensuel *= (1 + i_mensuel);
+                    // Ajuster le prélèvement avant retraite
+                    prelevementMensuel *= (1 + i_mensuel);
+                    // Ajuster le prélèvement après retraite
+                    prelevementApres *= (1 + i_mensuel);
                 }
 
                 // Incrémentation du compteur de mois dans l'année
@@ -307,12 +858,17 @@
 
             if (capitalEpuisé) {
                 var anneesEcoulees = (anneeEpuisement - A).toFixed(2);
-                resultText += "Le capital est épuisé après <strong>" + anneesEcoulees + " ans</strong> (à l'âge de <strong>" + anneeEpuisement.toFixed(2) + " ans</strong>).";
+                resultText += "Le capital est épuisé après <strong>" + anneesEcoulees + " ans</strong> (à l'âge de <strong>" + anneeEpuisement.toFixed(2) + " ans</strong>).<br>";
+                resultText += "<div style='color: #e74c3c; font-weight: bold; margin-top: 10px; font-style: italic;'>💀 Vous mourez ruiné, mais l'État n'aura rien.</div>";
             } else {
-                resultText += "Patrimoine restant (C) : <strong>" + P_actuel.toFixed(2) + " euros</strong>";
+                resultText += "Patrimoine restant (C) : <strong>" + P_actuel.toFixed(2) + " euros</strong><br>";
+                resultText += "<div style='color: #27ae60; font-weight: bold; margin-top: 10px; font-style: italic;'>💰 Vous mourez riche mais les linceuls n'ont pas de poches.</div>";
             }
 
             document.getElementById('result').innerHTML = resultText;
+            
+            // Afficher le bouton de génération de rapport après calcul
+            document.getElementById('genererRapport').style.display = 'block';
 
             // Génération du tableau du capital restant en fonction de l'âge
             var tableHTML = "<table><tr><th>Âge</th><th>Capital restant (€)</th></tr>";
@@ -346,15 +902,34 @@
                     datasets: [{
                         label: 'Capital restant (€)',
                         data: capitaux,
-                        backgroundColor: 'rgba(41, 128, 185, 0.2)',
-                        borderColor: 'rgba(41, 128, 185, 1)',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 3,
                         fill: true,
-                        pointRadius: 4,
-                        tension: 0.1
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        tension: 0.4,
+                        pointHoverBackgroundColor: '#764ba2',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 3
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart',
+                        animateRotate: true,
+                        animateScale: true
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -363,6 +938,17 @@
                                 font: {
                                     size: 16,
                                     weight: 'bold'
+                                },
+                                color: '#2c3e50'
+                            },
+                            grid: {
+                                color: 'rgba(102, 126, 234, 0.1)',
+                                borderColor: 'rgba(102, 126, 234, 0.3)'
+                            },
+                            ticks: {
+                                color: '#2c3e50',
+                                font: {
+                                    size: 12
                                 }
                             }
                         },
@@ -373,14 +959,38 @@
                                 font: {
                                     size: 16,
                                     weight: 'bold'
-                                }
+                                },
+                                color: '#2c3e50'
                             },
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(102, 126, 234, 0.1)',
+                                borderColor: 'rgba(102, 126, 234, 0.3)'
+                            },
+                            ticks: {
+                                color: '#2c3e50',
+                                font: {
+                                    size: 12
+                                },
+                                callback: function(value) {
+                                    return value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+                                }
+                            }
                         }
                     },
                     plugins: {
                         tooltip: {
+                            backgroundColor: 'rgba(102, 126, 234, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#764ba2',
+                            borderWidth: 2,
+                            cornerRadius: 10,
+                            displayColors: false,
                             callbacks: {
+                                title: function(context) {
+                                    return 'Âge : ' + context[0].label + ' ans';
+                                },
                                 label: function(context) {
                                     return 'Capital restant : ' + context.parsed.y.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
                                 }
@@ -389,20 +999,400 @@
                         legend: {
                             labels: {
                                 font: {
-                                    size: 14
-                                }
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                color: '#2c3e50',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
                             }
+                        }
+                    },
+                    onHover: function(event, activeElements) {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    },
+                    onClick: function(event, activeElements) {
+                        if (activeElements.length > 0) {
+                            var dataIndex = activeElements[0].index;
+                            var age = ages[dataIndex];
+                            var capital = capitaux[dataIndex];
+                            
+                            // Affichage d'une alerte avec les détails du point cliqué
+                            var message = 'Détails pour l\'âge ' + age + ' ans:\n\n' +
+                                         'Capital restant: ' + capital.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+                            
+                            // Animation du point cliqué
+                            var chart = window.myChart;
+                            chart.setActiveElements([{
+                                datasetIndex: 0,
+                                index: dataIndex
+                            }]);
+                            chart.update('none');
+                            
+                            // Notification stylée
+                            showNotification('Âge: ' + age + ' ans', 'Capital: ' + capital.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }));
                         }
                     }
                 }
             });
         }
 
-        // Gestion du clic sur le lien pour afficher le tableau
-        $(document).ready(function() {
-            $('#afficherTableau').click(function() {
-                $('#tableau').fadeToggle();
+        // Variables globales pour le rapport
+        var derniersResultats = {};
+
+        // Fonction pour générer le rapport HTML
+        function genererRapport() {
+            // Récupérer toutes les données
+            const genre = document.querySelector('input[name="genre"]:checked').value;
+            const age = document.getElementById('A').value;
+            const patrimoine = parseFloat(document.getElementById('P').value).toLocaleString('fr-FR');
+            const inflation = document.getElementById('i').value;
+            const tauxRem = document.getElementById('r').value;
+            const modele = document.getElementById('modeleTaux').value;
+            const revenuAvant = parseFloat(document.getElementById('revenuAvantRetraite').value).toLocaleString('fr-FR');
+            const prelevementAvant = parseFloat(document.getElementById('prelevementAvant').value).toLocaleString('fr-FR');
+            const prelevementApres = parseFloat(document.getElementById('prelevementApres').value).toLocaleString('fr-FR');
+            const ageRetraite = document.getElementById('ageRetraite').value;
+            const pension = parseFloat(document.getElementById('pensionMensuelleInitiale').value).toLocaleString('fr-FR');
+            const revaloRetraite = document.getElementById('tauxRevalorisationRetraite').value;
+            
+            const today = new Date().toLocaleDateString('fr-FR');
+            
+            // Récupérer les résultats
+            const resultDiv = document.getElementById('result');
+            const nrMatch = resultDiv.innerHTML.match(/Nombre d'années restantes \(NR\) : <strong>([^<]+)<\/strong>/);
+            const nr = nrMatch ? nrMatch[1] : "N/A";
+            
+            let resultatsHtml = "";
+            if (resultDiv.innerHTML.includes("épuisé")) {
+                const epuiseMatch = resultDiv.innerHTML.match(/épuisé après <strong>([^<]+)<\/strong>/);
+                const ageEpuise = resultDiv.innerHTML.match(/à l'âge de <strong>([^<]+)<\/strong>/);
+                resultatsHtml = `
+                    <p><strong>Capital épuisé après :</strong> ${epuiseMatch ? epuiseMatch[1] : 'N/A'}</p>
+                    <p><strong>Âge d'épuisement :</strong> ${ageEpuise ? ageEpuise[1] : 'N/A'}</p>
+                    <div style="color: #e74c3c; font-weight: bold; font-style: italic; margin: 15px 0; padding: 10px; background: rgba(231,76,60,0.1); border-left: 4px solid #e74c3c;">
+                        💀 Vous mourez ruiné, mais l'État n'aura rien.
+                    </div>
+                `;
+            } else {
+                const capitalMatch = resultDiv.innerHTML.match(/Patrimoine restant \(C\) : <strong>([^<]+)<\/strong>/);
+                resultatsHtml = `
+                    <p><strong>Capital restant final :</strong> ${capitalMatch ? capitalMatch[1] : 'N/A'}</p>
+                    <div style="color: #27ae60; font-weight: bold; font-style: italic; margin: 15px 0; padding: 10px; background: rgba(39,174,96,0.1); border-left: 4px solid #27ae60;">
+                        💰 Vous mourez riche mais les linceuls n'ont pas de poches.
+                    </div>
+                `;
+            }
+            
+            // Récupérer le graphique
+            const canvas = document.getElementById('myChart');
+            let graphiqueHtml = "";
+            if (canvas) {
+                const chartDataURL = canvas.toDataURL('image/png');
+                graphiqueHtml = `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="${chartDataURL}" alt="Graphique d'évolution du patrimoine" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                `;
+            }
+            
+            // Récupérer le tableau
+            const tableauDiv = document.getElementById('tableau');
+            const tableauHtml = tableauDiv.innerHTML || "<p>Tableau non généré</p>";
+            
+            // Description du modèle
+            let modelDescription = "";
+            switch(modele) {
+                case 'optimiste':
+                    modelDescription = "Scénario optimiste (β = +0.65) : Actifs réels, politique accommodante";
+                    break;
+                case 'median':
+                    modelDescription = "Scénario médian (β = -0.15) : Portefeuille diversifié, économie mixte";
+                    break;
+                case 'pessimiste':
+                    modelDescription = "Scénario pessimiste (β = -0.85) : Obligations dominantes, stagflation";
+                    break;
+                case 'probabiliste':
+                    modelDescription = "Moyenne pondérée selon le niveau d'inflation";
+                    break;
+                default:
+                    modelDescription = "Taux saisi manuellement";
+            }
+            
+            // Créer le contenu HTML du rapport
+            const rapportHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Simulation Patrimoniale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lexend Deca', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #085a92;
+            color: white;
+            border-radius: 10px;
+        }
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #085a92;
+            border-bottom: 2px solid #085a92;
+            padding-bottom: 10px;
+        }
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .param-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .param-label {
+            font-weight: 600;
+            color: #085a92;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #085a92;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .print-btn {
+            background: #085a92;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px;
+        }
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RAPPORT DE SIMULATION PATRIMONIALE</h1>
+        <p>Calcul du patrimoine résiduel selon l'espérance de vie</p>
+        <p><small>Rapport généré le ${today}</small></p>
+        <button class="print-btn" onclick="window.print()">🖨️ Imprimer ce rapport</button>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ AVERTISSEMENT IMPORTANT</h2>
+        <div class="disclaimer">
+            <strong>APPLICATION EXPÉRIMENTALE</strong><br>
+            Cette application est un outil de simulation à des fins pédagogiques uniquement.<br>
+            Elle ne constitue en aucun cas un conseil financier personnalisé.<br>
+            Consultez un professionnel pour vos décisions d'investissement.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 PARAMÈTRES DE SIMULATION</h2>
+        <div class="param-grid">
+            <div class="param-item"><span class="param-label">Genre :</span> ${genre === 'homme' ? 'Homme' : 'Femme'}</div>
+            <div class="param-item"><span class="param-label">Âge actuel :</span> ${age} ans</div>
+            <div class="param-item"><span class="param-label">Patrimoine initial :</span> ${patrimoine} €</div>
+            <div class="param-item"><span class="param-label">Taux d'inflation :</span> ${inflation} %</div>
+            <div class="param-item"><span class="param-label">Modèle de rémunération :</span> ${modele}</div>
+            <div class="param-item"><span class="param-label">Taux de rémunération :</span> ${tauxRem} %</div>
+            <div class="param-item"><span class="param-label">Revenu avant retraite :</span> ${revenuAvant} €</div>
+            <div class="param-item"><span class="param-label">Prélèvement avant retraite :</span> ${prelevementAvant} €</div>
+            <div class="param-item"><span class="param-label">Prélèvement après retraite :</span> ${prelevementApres} €</div>
+            <div class="param-item"><span class="param-label">Âge de retraite :</span> ${ageRetraite} ans</div>
+            <div class="param-item"><span class="param-label">Pension mensuelle :</span> ${pension} €</div>
+            <div class="param-item"><span class="param-label">Revalorisation retraite :</span> ${revaloRetraite} %</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📈 RÉSULTATS DE LA SIMULATION</h2>
+        <p><strong>Espérance de vie résiduelle :</strong> ${nr}</p>
+        ${resultatsHtml}
+    </div>
+
+    <div class="section">
+        <h2>📊 ÉVOLUTION DU PATRIMOINE</h2>
+        ${graphiqueHtml}
+    </div>
+
+    <div class="section">
+        <h2>📋 TABLEAU DÉTAILLÉ</h2>
+        ${tableauHtml}
+    </div>
+
+    <div class="section">
+        <h2>🔧 MODÈLE DE RÉMUNÉRATION DU CAPITAL</h2>
+        <p><strong>Formule générale :</strong> R = 3.5 + β×π - 0.05×π² - 0.3×σ</p>
+        <p><strong>Modèle utilisé :</strong> ${modelDescription}</p>
+        <p><small>Où π = taux d'inflation, β = coefficient de sensibilité selon le scénario, σ = volatilité</small></p>
+    </div>
+
+    <div class="section">
+        <h2>📚 SOURCES ET RÉFÉRENCES</h2>
+        <p>• Données démographiques : INSEE 2020</p>
+        <p>• Modèle économique : Synthèse d'études empiriques (1957-1996)</p>
+        <p>• Code source : <a href="https://github.com/l0d0v1c/EquationDeLaMort">github.com/l0d0v1c/EquationDeLaMort</a></p>
+    </div>
+</body>
+</html>
+            `;
+            
+            // Ouvrir le rapport dans une nouvelle fenêtre
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(rapportHtml);
+            newWindow.document.close();
+            
+            // Notification
+            showNotification("Rapport généré", "Rapport HTML ouvert dans un nouvel onglet");
+        }
+
+        // Fonction pour afficher une notification stylée
+        function showNotification(title, message) {
+            // Supprimer toute notification existante
+            $('.notification').remove();
+            
+            // Créer la notification
+            var notification = $('<div class="notification">' +
+                '<div class="notification-title">' + title + '</div>' +
+                '<div class="notification-message">' + message + '</div>' +
+                '<div class="notification-close">&times;</div>' +
+                '</div>');
+            
+            // Ajouter la notification au body
+            $('body').append(notification);
+            
+            // Animation d'apparition
+            notification.hide().fadeIn(300);
+            
+            // Fermeture automatique après 4 secondes
+            setTimeout(function() {
+                notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 4000);
+            
+            // Fermeture au clic sur la croix
+            notification.find('.notification-close').on('click', function() {
+                notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
             });
+        }
+
+        // Interactions jQuery
+        $(document).ready(function() {
+            // Animation d'entrée pour les éléments
+            $('.input-section, .chart-section').hide().fadeIn(1000);
+            
+            // Gestion du clic sur le lien pour afficher le tableau
+            $('#afficherTableau').click(function() {
+                $(this).addClass('loading-btn');
+                $('#tableau').slideToggle(500, function() {
+                    $('#afficherTableau').removeClass('loading-btn');
+                });
+                
+                // Changement du texte du bouton
+                var currentText = $(this).text();
+                if (currentText === 'Afficher le tableau') {
+                    $(this).text('Masquer le tableau');
+                } else {
+                    $(this).text('Afficher le tableau');
+                }
+            });
+            
+            // Animation des champs au focus
+            $('input[type="number"]').on('focus', function() {
+                $(this).parent().addClass('field-focused');
+            }).on('blur', function() {
+                $(this).parent().removeClass('field-focused');
+            });
+            
+            // Validation en temps réel
+            $('input[type="number"]').on('input', function() {
+                var value = parseFloat($(this).val());
+                if (isNaN(value) || value < 0) {
+                    $(this).addClass('field-error');
+                } else {
+                    $(this).removeClass('field-error');
+                }
+            });
+            
+            // Effet de bouton calculer
+            $('button').on('click', function() {
+                var $btn = $(this);
+                $btn.addClass('btn-loading');
+                
+                // Affichage de l'indicateur de chargement
+                $('#loadingIndicator').fadeIn(300);
+                
+                setTimeout(function() {
+                    $btn.removeClass('btn-loading');
+                    $('#loadingIndicator').fadeOut(300);
+                }, 1000);
+            });
+            
+            // Animation pour les radio buttons
+            $('input[type="radio"]').on('change', function() {
+                $('input[type="radio"][name="' + $(this).attr('name') + '"]').parent().removeClass('radio-selected');
+                $(this).parent().addClass('radio-selected');
+            });
+            
+            // Sélection initiale du radio button
+            $('input[type="radio"]:checked').parent().addClass('radio-selected');
+            
+            // Gestion du changement de modèle de taux
+            $('#modeleTaux').on('change', mettreAJourTaux);
+            $('#i').on('input', mettreAJourTaux);
+            
+            // Initialisation du taux au chargement
+            mettreAJourTaux();
         });
     </script>
 
