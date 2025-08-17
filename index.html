@@ -541,6 +541,86 @@
                 min-height: 44px;
             }
         }
+        
+        /* Styles pour les tooltips */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+            cursor: help;
+            vertical-align: middle;
+        }
+        
+        .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 1000;
+            width: 250px;
+            font-size: 12px;
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Adaptations mobile pour tooltips */
+        @media (max-width: 768px) {
+            .tooltip-content {
+                width: 200px;
+                font-size: 11px;
+                padding: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tooltip-content {
+                width: 180px;
+                bottom: 130%;
+                left: 0;
+                transform: none;
+            }
+            
+            .tooltip-content::after {
+                left: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -555,11 +635,27 @@
         <div class="input-section">
             <label>
                 Sexe biologique :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Sexe biologique</strong><br>
+                        Détermine les paramètres d'espérance de vie. Les modèles statistiques diffèrent selon le sexe biologique à la naissance.
+                    </div>
+                </div>
+                <br>
                 <input type="radio" name="genre" value="homme" checked> Homme
                 <input type="radio" name="genre" value="femme"> Femme
             </label>
             <label>
                 Modèle d'espérance de vie :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Modèle d'espérance de vie</strong><br>
+                        <strong>Gompertz-Makeham :</strong> Modèle sophistiqué basé sur une fonction de survie. Plus précis aux âges élevés.<br>
+                        <strong>Linéaire :</strong> Modèle simplifié INSEE 2020, formule linéaire.
+                    </div>
+                </div>
                 <select id="modeleEsperanceVie">
                     <option value="gompertz" selected>Gompertz-Makeham (par défaut)</option>
                     <option value="lineaire">Linéaire INSEE 2020</option>
@@ -567,18 +663,50 @@
             </label>
             <label>
                 Âge actuel (A) :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Âge actuel</strong><br>
+                        Votre âge aujourd'hui en années. Sert de point de départ pour calculer l'espérance de vie résiduelle selon les modèles statistiques.
+                    </div>
+                </div>
                 <input type="number" id="A" value="60" step="any">
             </label>
             <label>
                 Patrimoine initial (P) en euros :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Patrimoine initial</strong><br>
+                        Capital de départ disponible aujourd'hui (épargne, placements, liquidités). Base de calcul pour la simulation d'évolution patrimoniale.
+                    </div>
+                </div>
                 <input type="number" id="P" value="100000" step="any">
             </label>
             <label>
                 Taux d'inflation annuel (i) en % :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Taux d'inflation</strong><br>
+                        Hausse annuelle des prix. Affecte l'évolution des revenus, prélèvements et du pouvoir d'achat. Influence aussi la rémunération du capital selon le modèle choisi.
+                    </div>
+                </div>
                 <input type="number" id="i" value="2" step="any">
             </label>
             <label>
                 Modèle de rémunération du capital :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Modèle de rémunération</strong><br>
+                        <strong>Manuel :</strong> Taux fixe que vous définissez<br>
+                        <strong>Optimiste :</strong> Portefeuille d'actifs réels (immobilier, matières premières)<br>
+                        <strong>Médian :</strong> Portefeuille diversifié classique<br>
+                        <strong>Pessimiste :</strong> Portefeuille obligataire, période de stagflation<br>
+                        <strong>Pondéré :</strong> Moyenne selon le niveau d'inflation
+                    </div>
+                </div>
                 <select id="modeleTaux">
                     <option value="manuel">Manuel</option>
                     <option value="optimiste">Optimiste (β = +0.65)</option>
@@ -589,32 +717,81 @@
             </label>
             <label>
                 Taux de rémunération annuel du capital (r) en % :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Taux de rémunération du capital</strong><br>
+                        Rendement annuel de vos placements (intérêts, dividendes, plus-values). Calculé automatiquement selon le modèle choisi ou saisi manuellement.
+                    </div>
+                </div>
                 <input type="number" id="r" value="1" step="any">
                 <small id="tauxInfo" style="color: #667eea; font-size: 11px; margin-top: 4px; display: block;"></small>
             </label>
             <label>
                 Revenu mensuel avant la retraite en euros :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Revenu avant retraite</strong><br>
+                        Revenus mensuels nets d'activité (salaire, indépendant, etc.) qui alimentent votre capital jusqu'à la retraite. Ajustés automatiquement avec l'inflation.
+                    </div>
+                </div>
                 <input type="number" id="revenuAvantRetraite" value="3000" step="any">
             </label>
             <label>
                 Prélèvement mensuel sur le capital AVANT la retraite en euros :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Prélèvement avant retraite</strong><br>
+                        Montant mensuel prélevé sur votre capital pour compléter vos revenus d'activité (train de vie, dépenses). Généralement plus faible qu'après la retraite.
+                    </div>
+                </div>
                 <input type="number" id="prelevementAvant" value="1000" step="any">
             </label>
             <label>
                 Prélèvement mensuel sur le capital APRÈS la retraite en euros :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Prélèvement après retraite</strong><br>
+                        Montant mensuel prélevé sur votre capital pour compléter votre pension de retraite. Souvent plus élevé pour maintenir le niveau de vie.
+                    </div>
+                </div>
                 <input type="number" id="prelevementApres" value="2000" step="any">
             </label>
             <hr>
             <label>
                 Âge de départ à la retraite :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Âge de départ à la retraite</strong><br>
+                        Âge prévu pour cesser l'activité professionnelle. Marque la transition entre la phase "revenus d'activité" et "pension de retraite" dans la simulation.
+                    </div>
+                </div>
                 <input type="number" id="ageRetraite" value="64" step="any">
             </label>
             <label>
                 Montant initial de la retraite mensuelle en euros :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Pension de retraite</strong><br>
+                        Montant mensuel net de votre pension (régimes obligatoires + complémentaires) au moment du départ. Remplace les revenus d'activité dans la simulation.
+                    </div>
+                </div>
                 <input type="number" id="pensionMensuelleInitiale" value="2000" step="any">
             </label>
             <label>
                 Taux de revalorisation de la retraite annuel en % :
+                <div class="tooltip-container">
+                    <span class="tooltip-icon">?</span>
+                    <div class="tooltip-content">
+                        <strong>Revalorisation des retraites</strong><br>
+                        Hausse annuelle de votre pension (indexation). Généralement inférieure à l'inflation réelle. En France, souvent autour de 1% ces dernières années.
+                    </div>
+                </div>
                 <input type="number" id="tauxRevalorisationRetraite" value="1" step="any">
             </label>
 
@@ -1525,6 +1702,25 @@
             
             // Charger les paramètres depuis l'URL au démarrage
             chargerParametresURL();
+            
+            // Gestion des tooltips sur mobile (touch) et desktop (click)
+            $('.tooltip-icon').on('touchstart click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Masquer tous les autres tooltips
+                $('.tooltip-content').css('visibility', 'hidden').css('opacity', '0');
+                
+                // Afficher celui-ci
+                $(this).siblings('.tooltip-content').css('visibility', 'visible').css('opacity', '1');
+            });
+            
+            // Masquer les tooltips au clic ailleurs
+            $(document).on('touchstart click', function(e) {
+                if (!$(e.target).closest('.tooltip-container').length) {
+                    $('.tooltip-content').css('visibility', 'hidden').css('opacity', '0');
+                }
+            });
         });
     </script>
 
