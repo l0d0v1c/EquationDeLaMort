@@ -97,17 +97,34 @@ Probabilités dynamiques selon le niveau d'inflation :
 | 6-8% | 10% | 40% | 50% |
 | >8% | 5% | 25% | 70% |
 
-## 📊 Espérance de Vie (INSEE 2020)
+## 📊 Modèles d'Espérance de Vie
 
-### Formules par Genre
+### Modèle Gompertz-Makeham (par défaut)
+
+Utilise la **fonction de survie conditionnelle** avec paramètres ajustés TH/TF 00-02 :
+
+```
+S(t|a) = exp(-A×t - (B/ln(c))×(c^(a+t) - c^a))
+```
+
+**Paramètres par genre :**
+- **Hommes** : A=0.000958199, B=0.00002900877, c=1.101995
+- **Femmes** : A=0.00019153196, B=0.0000078122169, c=1.113875875
+
+**Calcul d'espérance :** Intégration numérique de la fonction de survie avec pas mensuel.
+
+### Modèle Linéaire (INSEE 2020)
 
 **Hommes :** `NR = -0.9279 × Âge + 78.492`
 **Femmes :** `NR = -0.9582 × Âge + 84.793`
+
+**Note :** Le modèle Gompertz-Makeham est plus précis, particulièrement aux âges élevés.
 
 ## 🔧 Fonctionnalités
 
 ### Calculs
 - ✅ **Simulation mois par mois** sur la durée de vie résiduelle
+- ✅ **Double modèle d'espérance de vie** : Gompertz-Makeham (défaut) ou linéaire INSEE
 - ✅ **Modèle bi-phasique** : avant/après retraite avec flux différenciés
 - ✅ **Ajustement automatique** revenus/prélèvements/pensions avec inflation
 - ✅ **Détection épuisement** du capital avec alerte d'âge
@@ -119,10 +136,12 @@ Probabilités dynamiques selon le niveau d'inflation :
 - ✅ **Graphique animé** avec interactions au clic
 - ✅ **Notifications stylées** pour les détails par âge
 - ✅ **Rapport HTML** détaillé avec bouton d'impression
+- ✅ **URL de partage** avec paramètres intégrés
 - ✅ **Mode responsive** optimisé mobile/tablette
 
 ### Modèles
-- ✅ **5 modes de calcul** : Manuel + 4 scénarios économiques
+- ✅ **2 modèles d'espérance de vie** : Gompertz-Makeham + linéaire INSEE
+- ✅ **5 modes de rémunération** : Manuel + 4 scénarios économiques
 - ✅ **Mise à jour dynamique** quand l'inflation change
 - ✅ **Descriptions contextuelles** des hypothèses
 - ✅ **Seuils de sécurité** pour éviter les aberrations
@@ -130,7 +149,8 @@ Probabilités dynamiques selon le niveau d'inflation :
 ## 🚨 Limitations et Précautions
 
 ### Validité du Modèle
-- **Base empirique** : Synthèse d'études sur 16 pays (1957-1996)
+- **Espérance de vie** : Modèle Gompertz-Makeham basé sur données TH/TF 00-02
+- **Rémunération capital** : Synthèse d'études sur 16 pays (1957-1996)
 - **Calibrage** : Coefficients estimés par logique économique
 - **Extrapolation** : Relations historiques projetées vers le futur
 - **Simplification** : Relations multivariées complexes simplifiées
@@ -150,9 +170,11 @@ Probabilités dynamiques selon le niveau d'inflation :
 ## 💻 Technologies
 
 - **Frontend** : HTML5, CSS3, JavaScript ES6
+- **Modèles mathématiques** : Gompertz-Makeham, simulation Monte Carlo
 - **Animations** : Transitions CSS3, animations keyframes
 - **Graphiques** : Chart.js 3.7.1 avec interactions
 - **UI/UX** : jQuery 3.6.0, design glassmorphism
+- **Partage** : URL encoding, paramètres persistants
 - **Typographie** : Google Fonts (Lexend Deca)
 - **Responsive** : Media queries, viewport mobile
 

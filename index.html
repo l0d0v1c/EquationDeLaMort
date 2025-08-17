@@ -559,6 +559,13 @@
                 <input type="radio" name="genre" value="femme"> Femme
             </label>
             <label>
+                Modèle d'espérance de vie :
+                <select id="modeleEsperanceVie">
+                    <option value="gompertz" selected>Gompertz-Makeham (par défaut)</option>
+                    <option value="lineaire">Linéaire INSEE 2020</option>
+                </select>
+            </label>
+            <label>
                 Âge actuel (A) :
                 <input type="number" id="A" value="60" step="any">
             </label>
@@ -643,6 +650,32 @@
     </div>
 
     <script>
+        // Paramètres Gompertz-Makeham issus de l'ajustement TH/TF 00-02
+        const GM_PARAMS = {
+            homme: { A: 0.000958199, B: 0.00002900877, c: 1.101995 },
+            femme: { A: 0.00019153196, B: 0.0000078122169, c: 1.113875875 }
+        };
+
+        // Fonction de survie conditionnelle Gompertz-Makeham
+        function S_conditional(t, a, {A, B, c}) {
+            const lnC = Math.log(c);
+            return Math.exp(-A*t - (B/lnC)*(Math.pow(c, a+t) - Math.pow(c, a)));
+        }
+
+        // Calcul de l'espérance de vie résiduelle avec Gompertz-Makeham
+        function esperanceVieResiduelle_GM(genre, age, stepYears = 1/12) {
+            const p = GM_PARAMS[genre];
+            const T = Math.max(0, 120 - age);
+            let EV = 0, Sprev = 1;
+            for (let t = stepYears; t <= T; t += stepYears) {
+                const Sc = S_conditional(t, age, p);
+                EV += 0.5 * (Sprev + Sc) * stepYears;
+                Sprev = Sc;
+                if (Sc < 1e-12) break;
+            }
+            return EV; // années
+        }
+
         // Fonction pour calculer le taux de rémunération selon le modèle choisi
         function calculerTauxRemuneration(inflation, modele, volatilite = 0.5) {
             const R_base = 3.5;
@@ -704,6 +737,7 @@
                 patrimoine: document.getElementById('P').value,
                 inflation: document.getElementById('i').value,
                 modele: document.getElementById('modeleTaux').value,
+                modeleEV: document.getElementById('modeleEsperanceVie').value,
                 taux: document.getElementById('r').value,
                 revenuAvant: document.getElementById('revenuAvantRetraite').value,
                 prelevementAvant: document.getElementById('prelevementAvant').value,
@@ -732,20 +766,21 @@
                 try {
                     const values = decodeURIComponent(casParam).split('|');
                     
-                    if (values.length >= 12) {
+                    if (values.length >= 13) {
                         // Restaurer les valeurs
                         document.querySelector(`input[name="genre"][value="${values[0]}"]`).checked = true;
                         document.getElementById('A').value = values[1];
                         document.getElementById('P').value = values[2];
                         document.getElementById('i').value = values[3];
                         document.getElementById('modeleTaux').value = values[4];
-                        document.getElementById('r').value = values[5];
-                        document.getElementById('revenuAvantRetraite').value = values[6];
-                        document.getElementById('prelevementAvant').value = values[7];
-                        document.getElementById('prelevementApres').value = values[8];
-                        document.getElementById('ageRetraite').value = values[9];
-                        document.getElementById('pensionMensuelleInitiale').value = values[10];
-                        document.getElementById('tauxRevalorisationRetraite').value = values[11];
+                        document.getElementById('modeleEsperanceVie').value = values[5];
+                        document.getElementById('r').value = values[6];
+                        document.getElementById('revenuAvantRetraite').value = values[7];
+                        document.getElementById('prelevementAvant').value = values[8];
+                        document.getElementById('prelevementApres').value = values[9];
+                        document.getElementById('ageRetraite').value = values[10];
+                        document.getElementById('pensionMensuelleInitiale').value = values[11];
+                        document.getElementById('tauxRevalorisationRetraite').value = values[12];
                         
                         // Mettre à jour le taux selon le modèle
                         mettreAJourTaux();
@@ -820,8 +855,17 @@
             var pensionMensuelleInitiale = parseFloat(document.getElementById('pensionMensuelleInitiale').value);
             var tauxRevalorisationRetraite_annuel = parseFloat(document.getElementById('tauxRevalorisationRetraite').value) / 100;
 
-            // Calcul de NR
-            var NR = a * A + b;
+            // Calcul de NR selon le modèle choisi
+            var modeleEsperanceVie = document.getElementById('modeleEsperanceVie').value;
+            var NR;
+            
+            if (modeleEsperanceVie === 'gompertz') {
+                // Modèle Gompertz-Makeham (par défaut)
+                NR = esperanceVieResiduelle_GM(genre, A);
+            } else {
+                // Modèle linéaire INSEE 2020
+                NR = a * A + b;
+            }
 
             // Vérification si NR est positif
             if (NR <= 0) {
@@ -1120,6 +1164,7 @@
             const inflation = document.getElementById('i').value;
             const tauxRem = document.getElementById('r').value;
             const modele = document.getElementById('modeleTaux').value;
+            const modeleEV = document.getElementById('modeleEsperanceVie').value;
             const revenuAvant = parseFloat(document.getElementById('revenuAvantRetraite').value).toLocaleString('fr-FR');
             const prelevementAvant = parseFloat(document.getElementById('prelevementAvant').value).toLocaleString('fr-FR');
             const prelevementApres = parseFloat(document.getElementById('prelevementApres').value).toLocaleString('fr-FR');
@@ -1315,6 +1360,7 @@
             <div class="param-item"><span class="param-label">Patrimoine initial :</span> ${patrimoine} €</div>
             <div class="param-item"><span class="param-label">Taux d'inflation :</span> ${inflation} %</div>
             <div class="param-item"><span class="param-label">Modèle de rémunération :</span> ${modele}</div>
+            <div class="param-item"><span class="param-label">Modèle d'espérance de vie :</span> ${modeleEV}</div>
             <div class="param-item"><span class="param-label">Taux de rémunération :</span> ${tauxRem} %</div>
             <div class="param-item"><span class="param-label">Revenu avant retraite :</span> ${revenuAvant} €</div>
             <div class="param-item"><span class="param-label">Prélèvement avant retraite :</span> ${prelevementAvant} €</div>
